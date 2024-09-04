@@ -1,35 +1,55 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { RecoilRoot, useRecoilValue, useRecoilValueLoadable } from 'recoil'
+import { jobsAtom, messagingAtom, networkAtom, notificationsAtom, todosAtom, totalSelector } from './atoms'
 
 function App() {
-  const [count, setCount] = useState(0)
+    return <RecoilRoot>
+      <MainApp />
+      <Todo id = {1}/>
+      <Todo id = {2}/>
+    </RecoilRoot>  
+  }
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+
+  const MainApp = (() => {
+    const networkCount = useRecoilValue(networkAtom)
+    const jobsCount = useRecoilValue(jobsAtom)
+    const messagingCount = useRecoilValue(messagingAtom)
+    const notificationsCount = useRecoilValue(notificationsAtom) 
+    const totalCount = useRecoilValue(totalSelector)
+
+    return (
+      <>
+        <button>Home</button>
+  
+        <button>My Network ({networkCount >= 100 ? "99+" : networkCount})</button>
+        <button>Jobs ({jobsCount})</button>
+        <button>Messaging ({messagingCount})</button>
+        <button>Notifications ({notificationsCount})</button>
+  
+        <button>Me ({totalCount})</button>
+  
+      </>
+    )
+  })
+
+  const Todo = (({id}) => {
+    const currentTodo = useRecoilValueLoadable(todosAtom(id))
+
+    if(currentTodo.state == "loading")
+      return <div>
+        ...loading
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    else if(currentTodo.state == "hasValue")
+      return (
+        <div>
+          {currentTodo.contents.title} <br></br>
+          {currentTodo.contents.description}
+        </div>
+      )
+    })
+    
+
 
 export default App
